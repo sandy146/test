@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import React from 'react';
 import { connect } from 'react-redux'
 import change from './change'
+import update from './update'
 
 class App extends Component {
   constructor() {
@@ -14,12 +15,26 @@ class App extends Component {
     console.log('hello in constructor4');
 
     this.state = {
-      name: 'xxxx'
+      name: 'xxxx',
+      persons:[]
     };
+  }
+  componentDidMount(){
+    let component = this;
+    fetch('https://jsonplaceholder.typicode.com/users')
+    .then(function(x) {return x.json()})
+    .then(function(result) {
+      console.log(result);
+      component.setState({persons:result})
+      console.log(component.state);
+    })
   }
   onChange(e) {
     console.log(this.props);
     this.props.change(e.target.value);
+  }
+  onChange1(e){
+    this.props.update(e.target.value);
   }
   
   Home = () => (
@@ -68,6 +83,10 @@ class App extends Component {
     return (
       <Router>
       <div>
+        <div>
+        {this.state.persons.map(ele => {return <p id={ele.id}>{ele.address.geo.lat}</p>})}
+
+        </div>
         <ul>
           <li>
             <Link to="/">Home</Link>
@@ -86,6 +105,8 @@ class App extends Component {
           </p>
         <hr />
 
+        <input type='text' onChange={this.onChange1.bind(this)}/>
+
         <Route exact path="/" component={this.Home} />
         <Route path="/about" component={this.About} />
          <Route path="/topics" component={this.Topics} /> 
@@ -97,7 +118,17 @@ class App extends Component {
 function mapStateToProps(state) {
   return {title:state.title}
 }
+function mapDispatchToProps(dispatch){
+  return {
+    change(title){
+      dispatch(change(title));
+    },
+    update(title){
+      dispatch(update(title));
+    }
+  }
+}
 export default connect(
-  mapStateToProps,{change}
+  mapStateToProps,mapDispatchToProps
   
 )(App)
